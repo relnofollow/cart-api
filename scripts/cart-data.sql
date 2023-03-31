@@ -25,6 +25,13 @@ CREATE TABLE orders (
 	total integer NOT NULL
 )
 
+CREATE TABLE users (
+	id uuid PRIMARY KEY,
+	name varchar(50) NOT NULL,
+	password varchar(100) NOT NULL, -- bcrypt hashed password
+	email varchar(200)
+)
+
 -- CART #1 (2 items)
 
 INSERT INTO carts VALUES 
