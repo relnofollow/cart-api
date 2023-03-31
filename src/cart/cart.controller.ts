@@ -1,10 +1,11 @@
 import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { BasicAuthGuard } from 'src/auth';
+import { Order } from 'src/orm';
 import { CART_STATUS } from 'src/orm/cart.entity';
+import { Connection } from 'typeorm';
 
 // import { BasicAuthGuard, JwtAuthGuard } from '../auth';
-import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 
 import { calculateCartTotal } from './models-rules';
@@ -14,7 +15,7 @@ import { CartService } from './services';
 export class CartController {
   constructor(
     private cartService: CartService,
-    private orderService: OrderService
+    private connection: Connection
   ) { }
 
   // @UseGuards(JwtAuthGuard)
@@ -72,18 +73,24 @@ export class CartController {
         statusCode,
         message: 'Cart is empty',
       });
+
+      return;
     }
 
     const total = calculateCartTotal(cart);
-    const order = await this.orderService.create({
-      ...body, // TODO: validate and pick only necessary data
-      userId,
-      cart,
-      total,
-    });
+    let order: Order;
 
-    order.cart.status = CART_STATUS.ORDERED;
-    await this.cartService.updateCart(order.cart);
+    await this.connection.transaction(async (transactionalEntityManager) => {
+      order = await transactionalEntityManager.create(Order, {
+        ...body, // TODO: validate and pick only necessary data
+        userId,
+        cart,
+        total,
+      });
+
+      order.cart.status = CART_STATUS.ORDERED;
+      await transactionalEntityManager.save(order.cart);
+    });
 
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
