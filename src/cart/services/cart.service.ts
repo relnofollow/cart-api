@@ -59,4 +59,8 @@ export class CartService {
   async removeByUserId(userId: string): Promise<void> {
     await this.cartsRepository.delete({ userId });
   }
+
+  async updateCart(cart: Cart): Promise<void> {
+    await this.cartsRepository.save(cart);
+  }
 }

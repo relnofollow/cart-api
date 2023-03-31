@@ -1,6 +1,7 @@
 import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { BasicAuthGuard } from 'src/auth';
+import { CART_STATUS } from 'src/orm/cart.entity';
 
 // import { BasicAuthGuard, JwtAuthGuard } from '../auth';
 import { OrderService } from '../order';
@@ -73,16 +74,16 @@ export class CartController {
       });
     }
 
-    const { id: cartId, items } = cart;
     const total = calculateCartTotal(cart);
-    const order = this.orderService.create({
+    const order = await this.orderService.create({
       ...body, // TODO: validate and pick only necessary data
       userId,
-      cartId,
-      items,
+      cart,
       total,
     });
-    await this.cartService.removeByUserId(userId);
+
+    order.cart.status = CART_STATUS.ORDERED;
+    await this.cartService.updateCart(order.cart);
 
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,

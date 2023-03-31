@@ -9,6 +9,7 @@ import { OrderModule } from './order/order.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Cart } from './orm/cart.entity';
 import { CartItem } from './orm/cart-item.entity';
+import { Order } from './orm/order.entity';
 
 @Module({
   imports: [
@@ -19,16 +20,18 @@ import { CartItem } from './orm/cart-item.entity';
     
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-          type: 'postgres',
-          host: configService.get('DB_HOST'),
-          port: +configService.get('DB_PORT'),
-          username: configService.get('DB_USERNAME'),
-          password: configService.get('DB_PASSWORD'),
-          database: configService.get('DB_DATABASE'),
-          entities: [ Cart, CartItem ],
-        logging: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        return {
+            type: 'postgres',
+            host: configService.get('DB_HOST'),
+            port: +configService.get('DB_PORT'),
+            username: configService.get('DB_USERNAME'),
+            password: configService.get('DB_PASSWORD'),
+            database: configService.get('DB_DATABASE'),
+            entities: [ Cart, CartItem, Order ],
+          logging: true,
+        };
+      },
       inject: [ConfigService]
     }),
   ],

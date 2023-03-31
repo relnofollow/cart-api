@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, OneToOne } from 'typeorm';
 import { CartItem } from './cart-item.entity';
+import { Order } from './order.entity';
 
-enum CART_STATUS {
+export enum CART_STATUS {
     OPEN = 'OPEN',
     ORDERED = 'ORDERED'
 }
@@ -43,4 +44,7 @@ export class Cart {
   @OneToMany(() => CartItem, (cartItem) => cartItem.cart, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'id', referencedColumnName: 'cart_id'})
   items: CartItem[]
+
+  @OneToOne(() => Order)
+  order: Order;
 }

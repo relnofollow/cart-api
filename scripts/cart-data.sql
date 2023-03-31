@@ -14,6 +14,17 @@ CREATE TABLE cart_items (
 	"count" integer NOT NULL
 )
 
+CREATE TABLE orders (
+	id uuid PRIMARY KEY,
+	user_id uuid NOT NULL,
+	cart_id uuid REFERENCES carts (id) ON DELETE SET NULL,
+	payment json,
+	delivery json,
+	"comments" text,
+	status text NOT NULL,
+	total integer NOT NULL
+)
+
 -- CART #1 (2 items)
 
 INSERT INTO carts VALUES 
